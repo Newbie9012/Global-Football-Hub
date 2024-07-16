@@ -55,11 +55,12 @@ getgenv().Character = Local.Character or Local.CharacterAdded:Wait()
 getgenv().Conn = nil
 getgenv().Conn2 = nil
 getgenv().Football = nil
+
  
  
 spawn(function()
     while wait() do
-        if Football ~= nil then
+        if Football then
             if not Football:FindFirstChild('MYHitbox') then
                 local Hitbox = Instance.new('Part',Football)
                 Hitbox.Size = Vector3.new(tonumber(Mag.Distance),tonumber(Mag.Distance),tonumber(Mag.Distance))
@@ -76,37 +77,27 @@ spawn(function()
 end)
  
  
---[[getgenv().FootballFinder = function()
+getgenv().FootballFinder = function()
     local Ball;
- 
-    for _, v in ipairs(game.Workspace:GetDescendants()) do
-        if v:IsA('Tool') and not game.Players:GetPlayerFromCharacter(v.Parent) then
-            if v:FindFirstChild('Handle') then
-                local handle = v:FindFirstChild('Handle')
-                if handle:FindFirstAncestorOfClass('BodyVelocity')   then
-                    Ball = v:FindFirstChild('Handle')
-                    return Ball
-                end
-            end
-        elseif v:IsA('Part') or v:IsA('BasePart') or v:IsA('MeshPart') then
-            if not game.Players:GetPlayerFromCharacter(v.Parent) or not v.Parent:FindFirstChild('Humanoid') then
-                if v:FindFirstAncestorOfClass('BodyVelocity') then
-                    Ball = v
-                    return Ball
-                end
-            end
+ 	
+    for _, v in ipairs(game.Workspace:GetChildren()) do
+        if v.Name == 'Football' then
+            Ball = v
+            return Ball
         end
     end
  
 return nil
-end--]]
- 
-getgenv().Rendered = function()
-    Football = FootballFinder()
 end
  
-local RunService = game:GetService('RunService')
-RunService.Heartbeat:Connect(Rendered)
+getgenv().Rendered = function()
+    while wait() do
+        Football = FootballFinder()
+    end
+end
+ 
+spawn(Rendered)
+
  
  
 local Options = Fluent.Options
