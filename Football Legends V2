@@ -60,7 +60,7 @@ getgenv().HitboxVisualizer = false
  
  
 getgenv().Visualizer = function()
-    while HitboxVisualizer do
+    while task.wait() do
         task.wait()
         if HitboxVisualizer == false then
             if Football then
