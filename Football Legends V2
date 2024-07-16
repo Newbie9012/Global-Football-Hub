@@ -61,6 +61,7 @@ getgenv().HitboxVisualizer = false
  
 getgenv().Visualizer = function()
     while HitboxVisualizer do
+        task.wait()
         if HitboxVisualizer == false then
             if Football then
                 if Football:FindFirstChild('MYHitbox') then
