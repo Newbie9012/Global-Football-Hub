@@ -1,4 +1,4 @@
-spawn(function()
+--[[spawn(function()
     while wait() do
         if game.Players.LocalPlayer.Character ~= nil then
             for i, v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
@@ -10,7 +10,7 @@ spawn(function()
             end
         end
     end
-end)
+end)--]]
  
  
 --[[spawn(function()
@@ -61,6 +61,26 @@ PlayersHitbox.Enabled = false
 PlayersHitbox.Size = Vector3.new(1,1,1)
 getgenv().Connections = {}
 getgenv().GetOtherCharacters = {}
+getgenv().PlayerBlocking = {}
+PlayerBlocking.Enabled = false
+
+getgenv().DisableBlocking = function()
+    while PlayerBlocking.Enabled == true do
+        if PlayerBlocking.Enabled == false then
+            break
+        end
+        task.wait()
+        if game.Players.LocalPlayer.Character ~= nil then
+            for i, v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+                if v:IsA('BodyVelocity') then
+                    if v.Name ~= game.Players.LocalPlayer.Name then
+                        v:Destroy()
+                    end
+                end
+            end
+        end
+    end
+end
 
 
 getgenv().FindConnections = function(value)
@@ -168,9 +188,12 @@ end
 game.Players.PlayerRemoving:Connect(function(player)
     if player ~= game.Players.LocalPlayer then
         if FindConnections(player) then
-            Connections[FindConnections(player)].Connection:Disconnect()
-            Connections[FindConnections(player)].RemovingConnection:Disconnect()
-            Connections[FindConnections(player)] = nil
+           --print(player, 'Player is leaving the game!')
+            if Connections[FindConnections(player)] ~= nil then
+                Connections[FindConnections(player)].Connection:Disconnect()
+                Connections[FindConnections(player)].RemovingConnection:Disconnect()
+                Connections[FindConnections(player)] = nil
+            end
         end
     end
 end)
@@ -545,6 +568,15 @@ do
  
     PlayerHitboxSlider:OnChanged(function(Value)
         PlayersHitbox.Size = Vector3.new(tonumber(Value),tonumber(Value),tonumber(Value))
+    end)
+
+    local Blocking = Tabs.Main:AddToggle("Blocking", {Title = "Disable Players Blocking You", Default = false })
+ 
+    Blocking:OnChanged(function(Value)
+        PlayerBlocking.Enabled = Value
+        if Value == true then
+            task.spawn(DisableBlocking)
+        end
     end)
     
  
