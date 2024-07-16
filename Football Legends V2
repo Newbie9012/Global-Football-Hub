@@ -13,7 +13,7 @@ spawn(function()
 end)
  
  
-spawn(function()
+--[[spawn(function()
     while wait() do
         for i, v in pairs(game.Players:GetPlayers()) do
             if v ~= game.Players.LocalPlayer and v.Team ~= game.Players.LocalPlayer.Team then
@@ -26,7 +26,7 @@ spawn(function()
             end
         end
     end
-end)
+end)--]]
  
  
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
@@ -106,25 +106,27 @@ game.Players.PlayerAdded:Connect(function(player)
     end
 end)
 
-for i , v in pairs(game.Players:GetPlayers()) do
-    if v ~= game.Players.LocalPlayer and player.Team ~= game.Players.LocalPlayer.Team then
-        if not FindConnections(v) then
-            Connections[math.random(1000000000,999999999999)] = {}
-            Connections.Player = player
-            Connections.Connection = player.CharacterAdded:Connect(function(Character)
-                repeat wait() until Character:FindFirstChild('Humanoid') or Character:FindFirstChild('HumanoidRootPart')
-                if PlayersHitbox.Enabled == true then
-                    Character:FindFirstChild('HumanoidRootPart').Size = PlayersHitbox.Size
-                    if not GetIndex(GetOtherCharacters,Character) then
-                        table.insert(GetOtherCharacters,Character)
+getgenv().SetFunction = function()
+    for i , v in pairs(game.Players:GetPlayers()) do
+        if v ~= game.Players.LocalPlayer and v.Team ~= game.Players.LocalPlayer.Team then
+            if not FindConnections(v) then
+                Connections[math.random(1000000000,999999999999)] = {}
+                Connections.Player = v
+                Connections.Connection = v.CharacterAdded:Connect(function(Character)
+                    repeat wait() until Character:FindFirstChild('Humanoid') or Character:FindFirstChild('HumanoidRootPart')
+                    if PlayersHitbox.Enabled == true then
+                        Character:FindFirstChild('HumanoidRootPart').Size = PlayersHitbox.Size
+                        if not GetIndex(GetOtherCharacters,Character) then
+                            table.insert(GetOtherCharacters,Character)
+                        end
                     end
-                end
-            end)
-            Connections.RemovingConnection = player.CharacterRemoving:Connect(function(character)
-                if GetIndex(GetOtherCharacters,Character) then
-                    table.remove(GetOtherCharacters,GetIndex(GetOtherCharacters,Character))
-                end
-            end)
+                end)
+                Connections.RemovingConnection = player.CharacterRemoving:Connect(function(character)
+                    if GetIndex(GetOtherCharacters,Character) then
+                        table.remove(GetOtherCharacters,GetIndex(GetOtherCharacters,Character))
+                    end
+                end)
+            end
         end
     end
 end
@@ -489,7 +491,7 @@ do
     PlayerHitbox:OnChanged(function(Value)
         PlayersHitbox.Enabled = Value
         if Value == true then
- 
+            task.spawn(SetFunction)
             task.spawn(PlayerHitboxFunc)
         end
     end)
