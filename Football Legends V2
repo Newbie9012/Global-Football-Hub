@@ -88,8 +88,8 @@ game.Players.PlayerAdded:Connect(function(player)
         if not FindConnections(player) then
             local randomDigit =  math.random(10000,9999999)
             Connections[randomDigit] = {}
-            Connections.Player = player
-            Connections.Connection = player.CharacterAdded:Connect(function(Character)
+            Connections[randomDigit].Player = player
+            Connections[randomDigit].Connection = player.CharacterAdded:Connect(function(Character)
                 repeat wait() until Character:FindFirstChild('Humanoid') or Character:FindFirstChild('HumanoidRootPart')
                 if PlayersHitbox.Enabled == true then
                     Character:FindFirstChild('HumanoidRootPart').Size = PlayersHitbox.Size
@@ -98,7 +98,7 @@ game.Players.PlayerAdded:Connect(function(player)
                     end
                 end
             end)
-            Connections.RemovingConnection = player.CharacterRemoving:Connect(function(character)
+            Connections[randomDigit].RemovingConnection = player.CharacterRemoving:Connect(function(character)
                 if GetIndex(GetOtherCharacters,Character) then
                     table.remove(GetOtherCharacters,GetIndex(GetOtherCharacters,Character))
                 end
@@ -113,8 +113,8 @@ getgenv().SetFunction = function()
             if not FindConnections(v) then
                 local randomDigit =  math.random(10000,9999999)
                 Connections[randomDigit] = {}
-                Connections.Player = v
-                Connections.Connection = v.CharacterAdded:Connect(function(Character)
+                Connections[randomDigit].Player = v
+                Connections[randomDigit].Connection = v.CharacterAdded:Connect(function(Character)
                     repeat wait() until Character:FindFirstChild('Humanoid') or Character:FindFirstChild('HumanoidRootPart')
                     if PlayersHitbox.Enabled == true then
                         Character:FindFirstChild('HumanoidRootPart').Size = PlayersHitbox.Size
@@ -123,7 +123,7 @@ getgenv().SetFunction = function()
                         end
                     end
                 end)
-                Connections.RemovingConnection = player.CharacterRemoving:Connect(function(character)
+                Connections[randomDigit].RemovingConnection = player.CharacterRemoving:Connect(function(character)
                     if GetIndex(GetOtherCharacters,Character) then
                         table.remove(GetOtherCharacters,GetIndex(GetOtherCharacters,Character))
                     end
