@@ -15,17 +15,17 @@ end)
  
 spawn(function()
     while wait() do
-            for i, v in pairs(game.Players:GetPlayers()) do
-                if v ~= game.Players.LocalPlayer and v.Team ~= game.Players.LocalPlayer.Team then
-                    if v.Character ~= nil then
-                        if v.Character:FindFirstChild('HumanoidRootPart') then
-                            v.Character:FindFirstChild('HumanoidRootPart').Size = Vector3.new(3,3,3)
-                            v.Character:FindFirstChild('HumanoidRootPart').Transparency = .5
-                        end
+        for i, v in pairs(game.Players:GetPlayers()) do
+            if v ~= game.Players.LocalPlayer and v.Team ~= game.Players.LocalPlayer.Team then
+                if v.Character ~= nil then
+                    if v.Character:FindFirstChild('HumanoidRootPart') then
+                        v.Character:FindFirstChild('HumanoidRootPart').Size = Vector3.new(3,3,3)
+                        v.Character:FindFirstChild('HumanoidRootPart').Transparency = .5
                     end
                 end
             end
         end
+    end
 end)
  
  
@@ -55,11 +55,20 @@ getgenv().Character = Local.Character or Local.CharacterAdded:Wait()
 getgenv().Conn = nil
 getgenv().Conn2 = nil
 getgenv().Football = nil
+getgenv().HitboxVisualizer = false
 
  
  
-spawn(function()
-    while wait() do
+getgenv().Visualizer = function()
+    while HitboxVisualizer do
+        if HitboxVisualizer == false then
+            if Football then
+                if Football:FindFirstChild('MYHitbox') then
+                    Football:FindFirstChild('MYHitbox'):Destroy()
+                end
+            end
+            break
+        end
         if Football then
             if not Football:FindFirstChild('MYHitbox') then
                 local Hitbox = Instance.new('Part',Football)
@@ -74,7 +83,7 @@ spawn(function()
             end
         end
     end
-end)
+end
  
  
 getgenv().FootballFinder = function()
@@ -323,6 +332,15 @@ do
     Dropdown:OnChanged(function(Value)
         MagType = tostring(Value)
     end)
+
+    local HitboxVisToggle = Tabs.Main:AddToggle("Mag Visualizer", {Title = "Show Visualizer", Default = false })
+ 
+    HitboxVisToggle:OnChanged(function(Value)
+        HitboxVisualizer = Value
+        if Value == true then
+            spawn(Visualizer)
+        end
+    end)
  
     -- Catch Hitbox
  
@@ -428,6 +446,8 @@ do
  
         end
     end)
+
+    
 -- Testing
     --Slider:SetValue(3)
  
@@ -516,7 +536,7 @@ do
             --print("Keybind changed!", New)
         end
     })
- 
+
     -- OnClick is only fired when you press the keybind and the mode is Toggle
     -- Otherwise, you will have to use Keybind:GetState()
     Keybind:OnClick(function()
