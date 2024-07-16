@@ -56,6 +56,102 @@ getgenv().Conn = nil
 getgenv().Conn2 = nil
 getgenv().Football = nil
 getgenv().HitboxVisualizer = false
+getgenv().PlayersHitbox = {}
+PlayersHitbox.Enabled = false
+PlayersHitbox.Size = Vector3.new(1,1,1)
+getgenv().Connections = {}
+getgenv().GetOtherCharacters = {}
+
+
+getgenv().FindConnections = function(value)
+    for i, v in pairs(Connections) do
+        if v.Player == value then
+            return v
+        end
+    end
+    return nil
+end
+
+getgenv().GetIndex = function(table,value)
+    for i, v in pairs(table) do
+        if v == value then
+            return i
+        end
+    end
+    return nil
+end
+
+game.Players.PlayerAdded:Connect(function(player)
+    repeat wait() until player.Team ~= nil
+    repeat wait() until player.Team ~= 'Waiting'
+    if player ~= game.Players.LocalPlayer and player.Team ~= game.Players.LocalPlayer.Team then
+        if not FindConnections(player) then
+            Connections[math.random(1000000000,999999999999)] = {}
+            Connections.Player = player
+            Connections.Connection = player.CharacterAdded:Connect(function(Character)
+                repeat wait() until Character:FindFirstChild('Humanoid') or Character:FindFirstChild('HumanoidRootPart')
+                if PlayersHitbox.Enabled == true then
+                    Character:FindFirstChild('HumanoidRootPart').Size = PlayersHitbox.Size
+                    if not GetIndex(GetOtherCharacters,Character) then
+                        table.insert(GetOtherCharacters,Character)
+                    end
+                end
+            end)
+            Connections.RemovingConnection = player.CharacterRemoving:Connect(function(character)
+                if GetIndex(GetOtherCharacters,Character) then
+                    table.remove(GetOtherCharacters,GetIndex(GetOtherCharacters,Character))
+                end
+            end)
+        end
+    end
+end)
+
+for i , v in pairs(game.Players:GetPlayers()) do
+    if v ~= game.Players.LocalPlayer and player.Team ~= game.Players.LocalPlayer.Team then
+        if not FindConnections(v) then
+            Connections[math.random(1000000000,999999999999)] = {}
+            Connections.Player = player
+            Connections.Connection = player.CharacterAdded:Connect(function(Character)
+                repeat wait() until Character:FindFirstChild('Humanoid') or Character:FindFirstChild('HumanoidRootPart')
+                if PlayersHitbox.Enabled == true then
+                    Character:FindFirstChild('HumanoidRootPart').Size = PlayersHitbox.Size
+                    if not GetIndex(GetOtherCharacters,Character) then
+                        table.insert(GetOtherCharacters,Character)
+                    end
+                end
+            end)
+            Connections.RemovingConnection = player.CharacterRemoving:Connect(function(character)
+                if GetIndex(GetOtherCharacters,Character) then
+                    table.remove(GetOtherCharacters,GetIndex(GetOtherCharacters,Character))
+                end
+            end)
+        end
+    end
+end
+
+
+game.Players.PlayerRemoving:Connect(function(player)
+    if player ~= game.Players.LocalPlayer then
+        if FindConnections(player) then
+            Connections[FindConnections(player)] = nil
+        end
+    end
+end)
+
+
+getgenv().PlayerHitboxFunc = function()
+    while wait() do
+        for i, v in pairs(GetOtherCharacters) do
+            if v ~= nil then
+                if v:FindFirstChild('HumanoidRootPart') then
+                    v:FindFirstChild('HumanoidRootPart').Size = PlayersHitbox.Size
+                    v:FindFirstChild('HumanoidRootPart').Transparency = .5
+                end
+            end
+        end
+    end
+end
+
 
  
  
@@ -182,6 +278,7 @@ getgenv().MagFunc = function()
 			    local Distance = (v.Position - Character.HumanoidRootPart.Position).Magnitude
 			    if Distance <= Mag.Distance and Mag.Enabled == true then
                     if MagType == 'Touch' then
+                        mouse1click()
                         firetouchinterest(Character:WaitForChild("Right Arm"), v, 0)
                         firetouchinterest(Character:WaitForChild("Right Arm"), v, 0)
                         firetouchinterest(Character:WaitForChild("Left Arm"), v, 0)
@@ -192,7 +289,9 @@ getgenv().MagFunc = function()
                         firetouchinterest(Character:WaitForChild("Left Arm"), v, 1)
                     elseif MagType == 'Vector' then
                         v.Position = Character.HumanoidRootPart.Position
+                        mouse1click()
                     elseif MagType == 'Both' then
+                        mouse1click()
                         v.Position = Character.HumanoidRootPart.Position
 				        firetouchinterest(Character:WaitForChild("Right Arm"), v, 0)
                         firetouchinterest(Character:WaitForChild("Right Arm"), v, 0)
@@ -383,6 +482,32 @@ do
     RFSlider:OnChanged(function(Value)
         CatchRange.RightHand = Vector3.new(tonumber(Value),tonumber(Value),tonumber(Value))
     end)
+-- Players Hitbox
+
+    local PlayerHitbox = Tabs.Main:AddToggle("PlayerHitbox", {Title = "Enable Players Hitbox", Default = false })
+ 
+    PlayerHitbox:OnChanged(function(Value)
+        PlayersHitbox.Enabled = Value
+        if Value == true then
+ 
+            task.spawn(PlayerHitboxFunc)
+        end
+    end)
+
+    local PlayerHitboxSlider = Tabs.Main:AddSlider("PlayerHitboxSlider", {
+        Title = "Change Players Hitbox",
+        Description = "Change the Hitbox of the players in game",
+        Default = 0,
+        Min = 1,
+        Max = 100,
+        Rounding = 1,
+ 
+    })
+ 
+    PlayerHitboxSlider:OnChanged(function(Value)
+        PlayersHitbox.Size = Vector3.new(tonumber(Value),tonumber(Value),tonumber(Value))
+    end)
+    
  
     local CatchTransparencySlider = Tabs.Main:AddSlider("TransparencyCatch", {
         Title = "Change Transparency",
@@ -447,6 +572,8 @@ do
  
         end
     end)
+
+
 
     
 -- Testing
