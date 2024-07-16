@@ -82,11 +82,12 @@ getgenv().GetIndex = function(table,value)
 end
 
 game.Players.PlayerAdded:Connect(function(player)
-    repeat wait() until player.Team ~= nil
-    repeat wait() until player.Team ~= 'Waiting'
+    --repeat wait() until player.Team ~= nil
+    --repeat wait() until player.Team ~= 'Waiting'
     if player ~= game.Players.LocalPlayer and player.Team ~= game.Players.LocalPlayer.Team then
         if not FindConnections(player) then
-            Connections[math.random(1000000000,999999999999)] = {}
+            local randomDigit =  math.random(10000,9999999)
+            Connections[randomDigit] = {}
             Connections.Player = player
             Connections.Connection = player.CharacterAdded:Connect(function(Character)
                 repeat wait() until Character:FindFirstChild('Humanoid') or Character:FindFirstChild('HumanoidRootPart')
@@ -110,7 +111,8 @@ getgenv().SetFunction = function()
     for i , v in pairs(game.Players:GetPlayers()) do
         if v ~= game.Players.LocalPlayer and v.Team ~= game.Players.LocalPlayer.Team then
             if not FindConnections(v) then
-                Connections[math.random(1000000000,999999999999)] = {}
+                local randomDigit =  math.random(10000,9999999)
+                Connections[randomDigit] = {}
                 Connections.Player = v
                 Connections.Connection = v.CharacterAdded:Connect(function(Character)
                     repeat wait() until Character:FindFirstChild('Humanoid') or Character:FindFirstChild('HumanoidRootPart')
