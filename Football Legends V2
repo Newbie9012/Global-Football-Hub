@@ -123,7 +123,7 @@ getgenv().SetFunction = function()
                         end
                     end
                 end)
-                Connections[randomDigit].RemovingConnection = player.CharacterRemoving:Connect(function(character)
+                Connections[randomDigit].RemovingConnection = v.CharacterRemoving:Connect(function(character)
                     if GetIndex(GetOtherCharacters,Character) then
                         table.remove(GetOtherCharacters,GetIndex(GetOtherCharacters,Character))
                     end
@@ -140,10 +140,36 @@ getgenv().SetFunction = function()
     end
 end
 
+getgenv().Stop = function()
+    for i, v in pairs(Connections) do
+        if v.Connection ~= nil and v.RemovingConnection ~= nil then
+            print(v.Connection,v.RemovingConnection)
+            v.Connection:Disconnect()
+            v.RemovingConnection:Disconnect()
+        end
+    end
+    Connections = {}
+    for i, v in pairs(GetOtherCharacters) do
+        if v:FindFirstChild('HumanoidRootPart') then
+            local HumanoidRootPart = v:FindFirstChild('HumanoidRootPart')
+            if HumanoidRootPart:FindFirstChild('OriginalSize') then
+                HumanoidRootPart.Size = tonumber(HumanoidRootPart:FindFirstChild('OriginalSize').Value)
+                HumanoidRootPart.Transparency = 1
+            else
+                HumanoidRootPart.Size = Vector3.new(1,2,1)
+                HumanoidRootPart.Transparency = 1
+            end
+        end
+    end
+    GetOtherCharacters = {}
+end
 
+ 
 game.Players.PlayerRemoving:Connect(function(player)
     if player ~= game.Players.LocalPlayer then
         if FindConnections(player) then
+            Connections[FindConnections(player)].Connection:Disconnect()
+            Connections[FindConnections(player)].RemovingConnection:Disconnect()
             Connections[FindConnections(player)] = nil
         end
     end
@@ -502,6 +528,8 @@ do
         if Value == true then
             task.spawn(SetFunction)
             task.spawn(PlayerHitboxFunc)
+        else
+            task.spawn(Stop)
         end
     end)
 
