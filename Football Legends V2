@@ -1,1 +1,608 @@
-
+spawn(function()
+    while wait() do
+        if game.Players.LocalPlayer.Character ~= nil then
+            for i, v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+                if v:IsA('BodyVelocity') then
+                    if v.Name ~= game.Players.LocalPlayer.Name then
+                        v:Destroy()
+                    end
+                end
+            end
+        end
+    end
+end)
+ 
+ 
+spawn(function()
+    while wait() do
+            for i, v in pairs(game.Players:GetPlayers()) do
+                if v ~= game.Players.LocalPlayer and v.Team ~= game.Players.LocalPlayer.Team then
+                    if v.Character ~= nil then
+                        if v.Character:FindFirstChild('HumanoidRootPart') then
+                            v.Character:FindFirstChild('HumanoidRootPart').Size = Vector3.new(3,3,3)
+                            v.Character:FindFirstChild('HumanoidRootPart').Transparency = .5
+                        end
+                    end
+                end
+            end
+        end
+end)
+ 
+ 
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+getgenv().Mag = {}
+Mag.Enabled = false
+Mag.Distance = 1
+Mag.MagType = nil
+MagTypes = {
+    'Vector',
+    'Touch',
+    'Both'
+}
+getgenv().CatchRange = {}
+CatchRange.Enabled = false
+CatchRange.RightHand = Vector3.new(1.2999999523162842, 1.433249831199646, 1.2999999523162842)
+CatchRange.LeftHand = Vector3.new(1.2999999523162842, 1.433249831199646, 1.2999999523162842)
+CatchRange.Transparency = 1
+CatchRange.Color = Color3.fromRGB()
+ 
+ 
+getgenv().Players = game:GetService('Players')
+getgenv().Local = Players.LocalPlayer
+getgenv().Character = Local.Character or Local.CharacterAdded:Wait()
+getgenv().Conn = nil
+getgenv().Conn2 = nil
+getgenv().Football = nil
+ 
+ 
+spawn(function()
+    while wait() do
+        if Football ~= nil then
+            if not Football:FindFirstChild('MYHitbox') then
+                local Hitbox = Instance.new('Part',Football)
+                Hitbox.Size = Vector3.new(tonumber(Mag.Distance),tonumber(Mag.Distance),tonumber(Mag.Distance))
+                Hitbox.Transparency = .5
+                Hitbox.CanCollide = false
+                Hitbox.Anchored = true
+                Hitbox.Name ='MYHitbox'
+                Hitbox.Position = Football.Position
+            else
+                Football:FindFirstChild('MYHitbox').Position = Football.Position
+            end
+        end
+    end
+end)
+ 
+ 
+--[[getgenv().FootballFinder = function()
+    local Ball;
+ 
+    for _, v in ipairs(game.Workspace:GetDescendants()) do
+        if v:IsA('Tool') and not game.Players:GetPlayerFromCharacter(v.Parent) then
+            if v:FindFirstChild('Handle') then
+                local handle = v:FindFirstChild('Handle')
+                if handle:FindFirstAncestorOfClass('BodyVelocity')   then
+                    Ball = v:FindFirstChild('Handle')
+                    return Ball
+                end
+            end
+        elseif v:IsA('Part') or v:IsA('BasePart') or v:IsA('MeshPart') then
+            if not game.Players:GetPlayerFromCharacter(v.Parent) or not v.Parent:FindFirstChild('Humanoid') then
+                if v:FindFirstAncestorOfClass('BodyVelocity') then
+                    Ball = v
+                    return Ball
+                end
+            end
+        end
+    end
+ 
+return nil
+end--]]
+ 
+getgenv().Rendered = function()
+    Football = FootballFinder()
+end
+ 
+local RunService = game:GetService('RunService')
+RunService.Heartbeat:Connect(Rendered)
+ 
+ 
+local Options = Fluent.Options
+Local.CharacterAdded:Connect(function(UpdatedCharacter)
+    Character = UpdatedCharacter
+    repeat wait() until UpdatedCharacter:FindFirstChild("Humanoid")
+    repeat wait() until Character:FindFirstChild('CRangeL') and Character:FindFirstChild('CRangeR')
+ 
+    UpdatedCharacter:FindFirstChild("Humanoid").Changed:Connect(function()
+        UpdatedCharacter:FindFirstChild("Humanoid").WalkSpeed = Options.WalkSpeedSlider.Value
+        UpdatedCharacter:FindFirstChild("Humanoid").JumpPower = Options.JumpPowerSlider.Value
+    end)
+    if Character:FindFirstChild('CRangeL') and Character:FindFirstChild('CRangeR') and CatchRange.Enabled == true then
+        Character:FindFirstChild('CRangeL').Size = Options.HitboxL
+        Character:FindFirstChild('CRangeR').Size = Options.HitboxR
+    end
+    pcall(function()
+        UpdatedCharacter:FindFirstChild("Humanoid").Died:Connect(function()
+            if Conn ~= nil then
+                Conn:Disconnect()
+                Conn = nil
+            elseif Conn2 ~= nil then
+                Conn2:Disconnect()
+                Conn2 = nil
+            end
+        end)
+    end)
+end)
+ 
+ 
+ 
+getgenv().CatchFunc = function()
+    while CatchRange.Enabled == true do
+        wait()
+       --- print(CatchRange.Enabled, 'Enabled')
+        if CatchRange.Enabled == false then
+            if  Character:FindFirstChild('CRangeL') and Character:FindFirstChild('CRangeR') then
+                if Character:FindFirstChild('CRangeL'):FindFirstChild('OriginalSize') and Character:FindFirstChild('CRangeR'):FindFirstChild('OriginalSize') then
+                    Character:FindFirstChild('CRangeR').Size = Character:FindFirstChild('CRangeR'):FindFirstChild('OriginalSize').Value
+                    Character:FindFirstChild('CRangeL').Size = Character:FindFirstChild('CRangeL'):FindFirstChild('OriginalSize').Value
+                    Character:FindFirstChild('CRangeR').Transparency = 1
+                    Character:FindFirstChild('CRangeL').Transparency = 1
+                end
+            end
+            break
+        end
+        if Character ~= nil then
+            if Character:FindFirstChild('CRangeL') and Character:FindFirstChild('CRangeR') and CatchRange.Enabled == true then
+               -- print(CatchRange.RightHand,CatchRange.LeftHand,'Enabled')
+                local CatchR = Character:FindFirstChild('CRangeR')
+                local CatchL = Character:FindFirstChild('CRangeL')
+                CatchR.Size = CatchRange.RightHand
+                CatchL.Size = CatchRange.LeftHand
+                CatchL.Transparency = CatchRange.Transparency
+                CatchR.Transparency = CatchRange.Transparency
+            end
+        end
+    end
+end
+ 
+ 
+getgenv().MagFunc = function()
+    while Mag.Enabled  == true do
+       -- print('yes')
+        task.wait()
+        if Mag.Enabled == false then break end
+        if Football ~= nil then
+            local v = Football
+            if game.Players.LocalPlayer.Character then
+			    local Character = game.Players.LocalPlayer.Character
+ 
+			    local Distance = (v.Position - Character.HumanoidRootPart.Position).Magnitude
+			    if Distance <= Mag.Distance and Mag.Enabled == true then
+                    if MagType == 'Touch' then
+                        firetouchinterest(Character:WaitForChild("Right Arm"), v, 0)
+                        firetouchinterest(Character:WaitForChild("Right Arm"), v, 0)
+                        firetouchinterest(Character:WaitForChild("Left Arm"), v, 0)
+                        firetouchinterest(Character:WaitForChild("Left Arm"), v, 0)
+                        firetouchinterest(Character:WaitForChild("Right Arm"), v, 1)
+                        firetouchinterest(Character:WaitForChild("Right Arm"), v, 1)
+                        firetouchinterest(Character:WaitForChild("Left Arm"), v, 1)
+                        firetouchinterest(Character:WaitForChild("Left Arm"), v, 1)
+                    elseif MagType == 'Vector' then
+                        v.Position = Character.HumanoidRootPart.Position
+                    elseif MagType == 'Both' then
+                        v.Position = Character.HumanoidRootPart.Position
+				        firetouchinterest(Character:WaitForChild("Right Arm"), v, 0)
+                        firetouchinterest(Character:WaitForChild("Right Arm"), v, 0)
+                        firetouchinterest(Character:WaitForChild("Left Arm"), v, 0)
+                        firetouchinterest(Character:WaitForChild("Left Arm"), v, 0)
+                        firetouchinterest(Character:WaitForChild("Right Arm"), v, 1)
+                        firetouchinterest(Character:WaitForChild("Right Arm"), v, 1)
+                        firetouchinterest(Character:WaitForChild("Left Arm"), v, 1)
+                        firetouchinterest(Character:WaitForChild("Left Arm"), v, 1)
+                    end
+                    --v.Position = Character.HumanoidRootPart.Position
+				    --[[firetouchinterest(Character:WaitForChild("Right Arm"), v, 0)
+                    firetouchinterest(Character:WaitForChild("Right Arm"), v, 0)
+                    firetouchinterest(Character:WaitForChild("Left Arm"), v, 0)
+                    firetouchinterest(Character:WaitForChild("Left Arm"), v, 0)
+                    firetouchinterest(Character:WaitForChild("Right Arm"), v, 1)
+                    firetouchinterest(Character:WaitForChild("Right Arm"), v, 1)
+                    firetouchinterest(Character:WaitForChild("Left Arm"), v, 1)
+                    firetouchinterest(Character:WaitForChild("Left Arm"), v, 1)--]]
+			    end
+		    end
+        end
+    end
+end
+ 
+ 
+ 
+ 
+local Window = Fluent:CreateWindow({
+    Title = "Global Mag for Football Games " .. '1.0',
+    SubTitle = "by unusa",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = true, -- The blur may be detectable, setting this to false disables blur entirely
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
+})
+ 
+--Fluent provides Lucide Icons https://lucide.dev/icons/ for the tabs, icons are optional
+local Tabs = {
+    Main = Window:AddTab({ Title = "Main", Icon = "" }),
+    Local = Window:AddTab({ Title = "Local", Icon = "" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+}
+ 
+ 
+ 
+do
+    --[[Fluent:Notify({
+        Title = "Notification",
+        Content = "This is a notification",
+        SubContent = "SubContent", -- Optional
+        Duration = 5 -- Set to nil to make the notification not disappear
+    })--]]
+ 
+ 
+ 
+    Tabs.Main:AddParagraph({
+        Title = "Mag Features",
+        Content = "This Section Contains mag features"
+    })
+ 
+    Tabs.Local:AddButton({
+        Title = "Remove Jump Cooldown",
+        Description = "Remove Jump Cooldown that is within the game",
+        Callback = function()
+            if game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild('JumpCooldown') then
+                game:GetService("Players").LocalPlayer.PlayerGui.JumpCooldown:Destroy()
+                Fluent:Notify({
+                    Title = "Cooldoown Removed",
+                    Content = "Complete, Enjoy :)",
+                    --SubContent = "SubContent", -- Optional
+                    Duration = 5 -- Set to nil to make the notification not disappear
+                })
+            else
+ 
+                Fluent:Notify({
+                    Title = "Cooldoown Removed",
+                    Content = "Already Removed!",
+                    --SubContent = "SubContent", -- Optional
+                    Duration = 5 -- Set to nil to make the notification not disappear
+                })
+            end
+ 
+ 
+        end
+    })
+ 
+ 
+ 
+ 
+ 
+    local Toggle = Tabs.Main:AddToggle("MagToggle", {Title = "Enable Mag", Default = false })
+ 
+    Toggle:OnChanged(function(Value)
+        Mag.Enabled = Value
+        if Value == true then
+            Fluent:Notify({
+                Title = "Unuas",
+                Content = "Remember to click to catch",
+                Duration = 8
+            })
+            task.spawn(MagFunc)
+        end
+    end)
+ 
+    --Options.MagToggle:SetValue(false)
+ 
+ 
+ 
+    local Slider = Tabs.Main:AddSlider("MagDistanceSlider", {
+        Title = "Mag Distance",
+        Description = "Max distance before mag activates",
+        Default = 1,
+        Min = 1,
+        Max = 100,
+        Rounding = 1,
+        Callback = function(Value)
+ 
+            Mag.Distance = tonumber(Value)
+        end
+    })
+ 
+    Slider:OnChanged(function(Value)
+        Mag.Distance = tonumber(Value)
+    end)
+ 
+ 
+    local Dropdown = Tabs.Main:AddDropdown("Dropdown", {
+        Title = "Mag Type",
+        Values = {'Touch','Vector','Both'},
+        Multi = false,
+        --Default = n,
+    })
+ 
+ 
+ 
+    Dropdown:OnChanged(function(Value)
+        MagType = tostring(Value)
+    end)
+ 
+    -- Catch Hitbox
+ 
+    local CatchToggle = Tabs.Main:AddToggle("CatchToggle", {Title = "Enable Catch Hitbox", Default = false })
+ 
+    CatchToggle:OnChanged(function(Value)
+        CatchRange.Enabled = Value
+       -- print(CatchRange.Enabled, 'Enabled')
+        if Value == true then
+ 
+            task.spawn(CatchFunc)
+        end
+    end)
+ 
+    local LFSlider = Tabs.Main:AddSlider("HitboxL", {
+        Title = "Catch Hitbox Left Hand",
+        Description = "Hitbox of the Left Hand",
+        Default = 1,
+        Min = 1,
+        Max = 100,
+        Rounding = 1,
+ 
+    })
+ 
+    LFSlider:OnChanged(function(Value)
+        CatchRange.LeftHand = Vector3.new(tonumber(Value),tonumber(Value),tonumber(Value))
+    end)
+ 
+    local RFSlider = Tabs.Main:AddSlider("HitboxR", {
+        Title = "Catch Hitbox Right Hand",
+        Description = "Hitbox of the Right Hand",
+        Default = 1,
+        Min = 1,
+        Max = 100,
+        Rounding = 1,
+ 
+    })
+ 
+    RFSlider:OnChanged(function(Value)
+        CatchRange.RightHand = Vector3.new(tonumber(Value),tonumber(Value),tonumber(Value))
+    end)
+ 
+    local CatchTransparencySlider = Tabs.Main:AddSlider("TransparencyCatch", {
+        Title = "Change Transparency",
+        Description = "Change Transparency of Catch Hitbox for both hands",
+        Default = 0,
+        Min = 0,
+        Max = 1,
+        Rounding = 1,
+ 
+    })
+ 
+    CatchTransparencySlider:OnChanged(function(Value)
+        CatchRange.Transparency = tonumber(Value)
+    end)
+ 
+-- End Options.WalkSpeedSlider
+ 
+    local wSlider = Tabs.Local:AddSlider("WalkSpeedSlider", {
+        Title = "Walk Speed",
+        Description = "Change your WalkSpeed",
+        Default = 1,
+        Min = 18,
+        Max = 50,
+        Rounding = 1,
+ 
+    })
+ 
+    wSlider:OnChanged(function(Value)
+        if Conn ~= nil then
+            Conn:Disconnect()
+            Conn = nil
+        end
+        if Character:FindFirstChild('Humanoid') then
+ 
+            Conn = Character:FindFirstChild("Humanoid").Changed:Connect(function()
+                Character:FindFirstChild("Humanoid").WalkSpeed = Value
+            end)
+ 
+        end
+    end)
+    -- End
+    local JSlider = Tabs.Local:AddSlider("JumpPowerSlider", {
+        Title = "Jump Power",
+        Description = "Change how high you can jump!",
+        Default = 1,
+        Min = 50,
+        Max = 100,
+        Rounding = 1,
+ 
+    })
+ 
+    JSlider:OnChanged(function(Value)
+        if Conn2 ~= nil then
+            Conn2:Disconnect()
+            Conn2 = nil
+        end
+        if Character:FindFirstChild('Humanoid') then
+ 
+            Conn2 = Character:FindFirstChild("Humanoid").Changed:Connect(function()
+                Character:FindFirstChild("Humanoid").JumpPower = Value
+            end)
+ 
+        end
+    end)
+-- Testing
+    --Slider:SetValue(3)
+ 
+ 
+ 
+    --[[local Dropdown = Tabs.Main:AddDropdown("Dropdown", {
+        Title = "Dropdown",
+        Values = {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen"},
+        Multi = false,
+        Default = 1,
+    })
+ 
+    Dropdown:SetValue("four")
+ 
+    Dropdown:OnChanged(function(Value)
+        print("Dropdown changed:", Value)
+    end)
+ 
+ 
+ 
+    local MultiDropdown = Tabs.Main:AddDropdown("MultiDropdown", {
+        Title = "Dropdown",
+        Description = "You can select multiple values.",
+        Values = {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen"},
+        Multi = true,
+        Default = {"seven", "twelve"},
+    })
+ 
+    MultiDropdown:SetValue({
+        three = true,
+        five = true,
+        seven = false
+    })
+ 
+    MultiDropdown:OnChanged(function(Value)
+        local Values = {}
+        for Value, State in next, Value do
+            table.insert(Values, Value)
+        end
+        print("Mutlidropdown changed:", table.concat(Values, ", "))
+    end)
+ 
+ 
+ 
+    local Colorpicker = Tabs.Main:AddColorpicker("Colorpicker", {
+        Title = "Colorpicker",
+        Default = Color3.fromRGB(96, 205, 255)
+    })
+ 
+    Colorpicker:OnChanged(function()
+        Character['Left Arm'].Color = Color3.fromRGB(Colorpicker.Value)
+    end)
+ 
+    --Colorpicker:SetValueRGB(Color3.fromRGB(0, 255, 140))
+ 
+ 
+ 
+    local TColorpicker = Tabs.Main:AddColorpicker("TransparencyColorpicker", {
+        Title = "Colorpicker",
+        Description = "but you can change the transparency.",
+        Transparency = 0,
+        Default = Color3.fromRGB(96, 205, 255)
+    })
+ 
+    TColorpicker:OnChanged(function()
+        print(
+            "TColorpicker changed:", TColorpicker.Value,
+            "Transparency:", TColorpicker.Transparency
+        )
+    end)--]]
+ 
+ 
+ 
+    local Keybind = Tabs.Main:AddKeybind("Keybind", {
+        Title = "KeyBind",
+        Mode = "Toggle", -- Always, Toggle, Hold
+        Default = "LeftControl", -- String as the name of the keybind (MB1, MB2 for mouse buttons)
+ 
+        -- Occurs when the keybind is clicked, Value is `true`/`false`
+        Callback = function(Value)
+            --print("Keybind clicked!", Value)
+        end,
+ 
+        -- Occurs when the keybind itself is changed, `New` is a KeyCode Enum OR a UserInputType Enum
+        ChangedCallback = function(New)
+            --print("Keybind changed!", New)
+        end
+    })
+ 
+    -- OnClick is only fired when you press the keybind and the mode is Toggle
+    -- Otherwise, you will have to use Keybind:GetState()
+    Keybind:OnClick(function()
+       -- print("Keybind clicked:", Keybind:GetState())
+    end)
+ 
+    Keybind:OnChanged(function()
+       -- print("Keybind changed:", Keybind.Value)
+    end)
+ 
+    task.spawn(function()
+        while true do
+            wait(1)
+ 
+            -- example for checking if a keybind is being pressed
+            local state = Keybind:GetState()
+            if state then
+              --  print("Keybind is being held down")
+            end
+ 
+            if Fluent.Unloaded then break end
+        end
+    end)
+ 
+    Keybind:SetValue("MB2", "Toggle") -- Sets keybind to MB2, mode to Hold
+ 
+ 
+    local Input = Tabs.Main:AddInput("Input", {
+        Title = "Input",
+        Default = "Default",
+        Placeholder = "Placeholder",
+        Numeric = false, -- Only allows numbers
+        Finished = false, -- Only calls callback when you press enter
+        Callback = function(Value)
+    --        print("Input changed:", Value)
+        end
+    })
+ 
+    Input:OnChanged(function()
+     --   print("Input updated:", Input.Value)
+    end)
+end
+ 
+ 
+-- Addons:
+-- SaveManager (Allows you to have a configuration system)
+-- InterfaceManager (Allows you to have a interface managment system)
+ 
+-- Hand the library over to our managers
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+ 
+-- Ignore keys that are used by ThemeManager.
+-- (we dont want configs to save themes, do we?)
+SaveManager:IgnoreThemeSettings()
+ 
+-- You can add indexes of elements the save manager should ignore
+SaveManager:SetIgnoreIndexes({})
+ 
+-- use case for doing it this way:
+-- a script hub could have themes in a global folder
+-- and game configs in a separate folder per game
+InterfaceManager:SetFolder("FluentScriptHub")
+SaveManager:SetFolder("FluentScriptHub/specific-game")
+ 
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+ 
+ 
+Window:SelectTab(1)
+ 
+Fluent:Notify({
+    Title = "Unuas",
+    Content = "The script has been loaded.",
+    Duration = 8
+})
+ 
+-- You can use the SaveManager:LoadAutoloadConfig() to load a config
+-- which has been marked to be one that auto loads!
+SaveManager:LoadAutoloadConfig()
