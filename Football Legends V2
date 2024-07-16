@@ -128,9 +128,12 @@ getgenv().SetFunction = function()
                         table.remove(GetOtherCharacters,GetIndex(GetOtherCharacters,Character))
                     end
                 end)
-                if not GetIndex(GetOtherCharacters,Character) then
-                    print(Character,'...')
-                    table.insert(GetOtherCharacters,Character)
+                if v.Character ~= nil then
+                    local Character = v.Character
+                    if not GetIndex(GetOtherCharacters,Character) then
+                        print(Character,'...')
+                        table.insert(GetOtherCharacters,Character)
+                    end
                 end
             end
         end
